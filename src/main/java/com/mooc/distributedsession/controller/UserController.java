@@ -1,11 +1,12 @@
 package com.mooc.distributedsession.controller;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.UUID;
@@ -14,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/user")
 @RestController
 public class UserController {
+
+    private static final String JWT_KEY = "imooc";
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -46,5 +49,25 @@ public class UserController {
     @GetMapping("/infoWithToken")
     public String infoWithToken(@RequestParam String token) {
         return "当前登录的是:" + stringRedisTemplate.opsForValue().get(token);
+    }
+
+
+    @GetMapping("/loginWithJwt")
+    public String loginWithJwt(@RequestParam String username,
+                               @RequestParam String password) {
+        Algorithm algorithm = Algorithm.HMAC256(JWT_KEY);
+        String token = JWT.create()
+                .withClaim("login_user", username)
+                .sign(algorithm);
+        return token;
+    }
+
+    @GetMapping("/infoWithJwt")
+    public String infoWithJwt(@RequestHeader String token) {
+        Algorithm algorithm = Algorithm.HMAC256(JWT_KEY);
+        JWTVerifier verifier = JWT.require(algorithm)
+                .build(); //Reusable verifier instance
+        DecodedJWT jwt = verifier.verify(token);
+        return jwt.getClaim("login_user").asString();
     }
 }
