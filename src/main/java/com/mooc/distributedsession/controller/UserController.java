@@ -15,11 +15,13 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static com.mooc.distributedsession.LoginIntercepter.JWT_KEY;
+import static com.mooc.distributedsession.LoginIntercepter.UID;
+
 @RequestMapping("/user")
 @RestController
 public class UserController {
 
-    private static final String JWT_KEY = "imooc";
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -61,7 +63,7 @@ public class UserController {
         Algorithm algorithm = Algorithm.HMAC256(JWT_KEY);
         String token = JWT.create()
                 .withClaim("login_user", username)
-                .withClaim("id", 1)
+                .withClaim(UID, 1)
                 // 过期时间
                 .withExpiresAt(new Date(System.currentTimeMillis() + 3600000))
                 .sign(algorithm);
@@ -69,19 +71,17 @@ public class UserController {
     }
 
     @GetMapping("/infoWithJwt")
-    public String infoWithJwt(@RequestHeader String token) {
-        Algorithm algorithm = Algorithm.HMAC256(JWT_KEY);
-        JWTVerifier verifier = JWT.require(algorithm)
-                .build(); //Reusable verifier instance
-        // 如果过期会抛异常
-        try {
-            DecodedJWT jwt = verifier.verify(token);
-            return jwt.getClaim("login_user").asString();
-        }catch (TokenExpiredException e) {
-            // Token过期
-        }catch (JWTDecodeException e) {
-            // 解码失败，token错误
-        }
-        return "error";
+    public String infoWithJwt(@RequestAttribute String login_user) {
+        return login_user;
     }
+
+
+    //获取地址, token -> id
+    @GetMapping("/address")
+    public Integer address(@RequestAttribute Integer uid) {
+        return uid;
+    }
+
+
+    // 修改地址...
 }
