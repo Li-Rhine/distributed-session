@@ -10,6 +10,4 @@ public class DistributedSessionApplication {
         SpringApplication.run(DistributedSessionApplication.class, args);
     }
 
-
-
 }
