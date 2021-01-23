@@ -10,6 +10,5 @@ public class DistributedSessionApplication {
         SpringApplication.run(DistributedSessionApplication.class, args);
     }
 
-    2222
 
 }
