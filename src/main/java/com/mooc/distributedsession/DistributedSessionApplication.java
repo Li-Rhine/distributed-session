@@ -11,5 +11,6 @@ public class DistributedSessionApplication {
     }
 
 
-    11 22
+    11 22 3
+    3
 }
